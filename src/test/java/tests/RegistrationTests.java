@@ -69,7 +69,7 @@ public class RegistrationPage extends TestBase {
     }
 
     public RegistrationPage setAddress(String value) {
-        addressInput.$(byText(value));
+        addressInput.setValue(value);
 
         return this;
     }
