@@ -1,146 +1,98 @@
-package pages;
+package tests;
 
-import com.codeborne.selenide.Condition;
-import com.codeborne.selenide.SelenideElement;
-import pages.components.CalendarComponent;
-import pages.components.SpreadsheetComponent;
-import pages.components.StateCityComponent;
-import tests.TestBase;
+import org.junit.jupiter.api.Test;
+import pages.RegistrationPage;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.*;
-import static com.codeborne.selenide.Selenide.executeJavaScript;
 
-public class RegistrationPage extends TestBase {
+public class RegistrationTests extends TestBase {
 
-    ///// SelenideElements
-    CalendarComponent calendar = new CalendarComponent();
-    StateCityComponent stateCity = new StateCityComponent();
+    RegistrationPage registrationPage = new RegistrationPage();
 
-    SpreadsheetComponent spreadsheet = new SpreadsheetComponent();
+        @Test
+        void successfulRegistrationTest() {
+            registrationPage.openPage()
+                    .setFirstName("Alex")
+                    .setLastName("Egorov")
+                    .setEmail("alex@egorov.com")
+                    .setGender("Other")
+                    .setUserNumber("1234567890")
+                    .setDateOfBirth("30", "July", "2008")
+                    .setSubject("Maths")
+                    .setHobby("Sports")
+                    .selectPicture("img/1.png")
+                    .setAddress("Fhvxk 322")
+                    .setStateAndCity("NCR","Delhi")
+                    .clickSubmit();
 
-    SelenideElement titleLabel = $(".practice-form-wrapper"),
-            firstNameInput = $("#firstName"),
-            lastNameInput = $("#lastName"),
-            userEmailInput = $("#userEmail"),
-            genderWrapper = $("#genterWrapper"),
-            userNumberInput = $("#userNumber"),
-            subjectInput = $("#subjectsInput"),
-            hobbyWrapper = $("#hobbiesWrapper"),
-            uploadPicture = $("#uploadPicture"),
-            addressInput = $("#currentAddress"),
-            submit = $("#submit");
+            registrationPage.checkSpreadsheetWithResults()
+                    .checkResult("Student Name", "Alex Egorov")
+                    .checkResult("Student Email", "alex@egorov.com")
+                    .checkResult("Mobile", "1234567890");
 
+        }
 
-    ///// Actions
-    public RegistrationPage openPage() {
-        open("/automation-practice-form");
-        titleLabel.shouldHave(text("Student Registration Form"));
-        executeJavaScript("$('#fixedban').remove()");
-        executeJavaScript("$('footer').remove()");
+    @Test
+    void successfulIncompleteRegistrationTest() {
+        registrationPage.openPage()
+                .setFirstName("Alex")
+                .setLastName("Egorov")
+                .setGender("Other")
+                .setUserNumber("1234567890")
+                .setDateOfBirth("30", "July", "2008")
+                .setAddress("Fhvxk 322")
+                .setStateAndCity("NCR","Delhi")
+                .clickSubmit();
 
-        return this;
+        registrationPage.checkSpreadsheetWithResults()
+                .checkResult("Student Name", "Alex Egorov")
+                .checkResult("Gender", "Other")
+                .checkResult("Mobile", "1234567890")
+                .checkEmptyResult("Student Email","")
+                .checkEmptyResult("Subjects","")
+                .checkEmptyResult("Hobbies","")
+                .checkEmptyResult("Picture","");
+
     }
 
+    @Test
+    void negativeRegistrationTestWithoutLastName() {
+        registrationPage.openPage()
+                .setFirstName("Alex")
+                .setEmail("alex@egorov.com")
+                .setGender("Other")
+                .setUserNumber("1234567890")
+                .setDateOfBirth("30", "July", "2008")
+                .setSubject("Maths")
+                .setHobby("Sports")
+                .selectPicture("img/1.png")
+                .setAddress("Fhvxk 322")
+                .setStateAndCity("NCR","Delhi")
+                .clickSubmit();
 
-    public RegistrationPage setFirstName(String value) {
-        firstNameInput.setValue(value);
+        registrationPage.checkSpreadsheetWithResultsMissing();
 
-        return this;
     }
 
-    public RegistrationPage setLastName(String value) {
-        lastNameInput.setValue(value);
+    @Test
+    void negativeRegistrationTestWithoutGender() {
+        registrationPage.openPage()
+                .setFirstName("Alex")
+                .setLastName("Egorov")
+                .setEmail("alex@egorov.com")
+                .setUserNumber("1234567890")
+                .setDateOfBirth("30", "July", "2008")
+                .setSubject("Maths")
+                .setHobby("Sports")
+                .selectPicture("img/1.png")
+                .setAddress("Fhvxk 322")
+                .setStateAndCity("NCR","Delhi")
+                .clickSubmit();
 
-        return this;
+        registrationPage.checkSpreadsheetWithResultsMissing();
+
     }
 
-    public RegistrationPage setEmail(String value) {
-        userEmailInput.setValue(value);
-
-        return this;
     }
-
-    public RegistrationPage setGender(String value) {
-        genderWrapper.$(byText(value)).click();
-
-        return this;
-    }
-
-    public RegistrationPage setAddress(String value) {
-        addressInput.setValue(value);
-
-        return this;
-    }
-
-    public RegistrationPage setUserNumber(String value) {
-        userNumberInput.setValue(value);
-
-        return this;
-    }
-
-    public RegistrationPage setDateOfBirth(String day, String month, String year) {
-        $("#dateOfBirthInput").click();
-        calendar.setDate("30", "July", "2008");
-
-        return this;
-    }
-
-    public RegistrationPage setSubject(String value) {
-        subjectInput.setValue(value).pressEnter();
-
-        return this;
-    }
-
-    public RegistrationPage setHobby(String value) {
-        hobbyWrapper.$(byText(value)).click();;
-
-        return this;
-    }
-
-    public RegistrationPage selectPicture(String fileName) {
-        uploadPicture.uploadFromClasspath(fileName);
-
-        return this;
-    }
-
-    public RegistrationPage setStateAndCity(String state, String city) {
-        stateCity.setStateCity(state,city);
-
-        return this;
-    }
-
-    public RegistrationPage clickSubmit() {
-        submit.click();
-
-        return this;
-    }
-
-    public RegistrationPage checkResult(String key, String value) {
-        $(".table-responsive").$(byText(key)).parent()
-                .shouldHave(text(value));
-
-        return this;
-    }
-
-    public RegistrationPage checkEmptyResult(String key, String value) {
-        $(".table-responsive").$(byText(key)).parent()
-                .shouldHave(text(" "));
-
-        return this;
-    }
-    public RegistrationPage checkSpreadsheetWithResultsMissing() {
-        spreadsheet.checkSpreadsheetMissing();
-        return this;
-    }
-
-    public RegistrationPage checkSpreadsheetWithResults() {
-        spreadsheet.checkSpreadsheet();
-
-        return this;
-    }
-
-}
-
-
