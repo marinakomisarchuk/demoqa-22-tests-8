@@ -3,6 +3,7 @@ package pages;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
 
+import static com.codeborne.selenide.Condition.appear;
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.*;
@@ -45,7 +46,8 @@ public class LoginPage {
     }
 
     public LoginPage checkResult(String userName) {
-        $(".pattern-backgound playgound-header").shouldHave(text("Profile"));
+        $("#app").should(appear);
+        $(".pattern-backgound").shouldHave(text("Profile"));
         $("#userName-value").shouldHave(text(userName));
 
         return this;
